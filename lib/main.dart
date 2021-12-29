@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  color: Colors.grey[200],
+                  color: Theme.of(context).colorScheme.primaryVariant,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -256,7 +256,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Container(
                 decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: Theme.of(context).colorScheme.primaryVariant,
                     borderRadius: BorderRadius.circular(6)),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -4,7 +4,7 @@ ThemeData globalTheme() => ThemeData(
     fontFamily: 'Verdana',
     splashColor: Colors.yellow,
     colorScheme: ColorScheme.fromSwatch(
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
       primarySwatch: Colors.blue,
     ).copyWith(secondary: Colors.green),
     textTheme: const TextTheme(
