@@ -1,74 +1,100 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
+import 'dart:convert';
 
-void main() {
-  runApp(const MyApp());
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+Future<Post> fetchPost() async {
+  final response =
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
+
+  if (response.statusCode == 200) {
+    return Post.fromJson(jsonDecode(response.body));
+  } else {
+    throw Exception('Failed to load post');
+  }
 }
 
-class MyApp extends StatelessWidget {
+class Post {
+  final int userId;
+  final int id;
+  final String title;
+  final String body;
+
+  Post({
+    required this.userId,
+    required this.id,
+    required this.title,
+    required this.body,
+  });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    return Post(
+        userId: json['userId'],
+        id: json['id'],
+        title: json['title'],
+        body: json['body']);
+  }
+}
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late Future<Post> futurePost;
+
+  @override
+  void initState() {
+    super.initState();
+    futurePost = fetchPost();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Case5',
+      title: 'Fetch Post Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text("Case5"),
+          title: const Text('Fetch Post Example'),
         ),
-        body: MyHomePage(),
-      ),
-    );
-  }
-}
+        body: Center(
+          child: FutureBuilder<Post>(
+            future: futurePost,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return Container(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        snapshot.data!.title,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                      Text(
+                        snapshot.data!.body,
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                );
+              } else if (snapshot.hasError) {
+                return Text('${snapshot.error}');
+              }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key}) : super(key: key);
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  // var list = List<int>.generate(20, (index) => index + 1);
-  int _selectedIndex = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: 20,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            leading: Icon(Icons.wb_sunny),
-            title: Text("Item $index"),
-            selected: index == _selectedIndex,
-            onTap: () {
-              setState(() {
-                _selectedIndex = index;
-              });
+              return const CircularProgressIndicator();
             },
-          );
-        });
-  }
-}
-
-class MyListItem extends StatelessWidget {
-  const MyListItem({Key? key, required this.number}) : super(key: key);
-
-  final int number;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20),
-      margin: EdgeInsets.all(5),
-      decoration: BoxDecoration(
-        color: Colors.lightBlueAccent,
-        border: Border.all(),
-      ),
-      child: Text(
-        "Элемент # $number",
-        style: Theme.of(context).textTheme.headline6,
+          ),
+        ),
       ),
     );
   }
