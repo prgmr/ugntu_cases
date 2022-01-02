@@ -1,101 +1,145 @@
-import 'dart:async';
-import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-Future<Post> fetchPost() async {
-  final response =
-      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts/1'));
-
-  if (response.statusCode == 200) {
-    return Post.fromJson(jsonDecode(response.body));
-  } else {
-    throw Exception('Failed to load post');
-  }
+void main() {
+  runApp(MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(
+        title: Text("Case 6"),
+      ),
+      body: HomeScreen(),
+    ),
+  ));
 }
 
-class Post {
-  final int userId;
-  final int id;
-  final String title;
-  final String body;
+class HomeScreen extends StatefulWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
-  Post({
-    required this.userId,
-    required this.id,
-    required this.title,
-    required this.body,
-  });
-
-  factory Post.fromJson(Map<String, dynamic> json) {
-    return Post(
-        userId: json['userId'],
-        id: json['id'],
-        title: json['title'],
-        body: json['body']);
-  }
-}
-
-void main() => runApp(const MyApp());
-
-class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  final CounterStorage storage2 = CounterStorage();
 
   @override
-  _MyAppState createState() => _MyAppState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _MyAppState extends State<MyApp> {
-  late Future<Post> futurePost;
+class _HomeScreenState extends State<HomeScreen> {
+  int _counter1 = 0;
+  int _counter2 = 0;
+
+  var textStyle = const TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
 
   @override
   void initState() {
     super.initState();
-    futurePost = fetchPost();
+    _loadCounter1();
+    widget.storage2.readCounter().then((int value) => {
+          setState(() {
+            _counter2 = value;
+          })
+        });
+  }
+
+  void _loadCounter1() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter1 = (prefs.getInt('counter1') ?? 0);
+    });
+  }
+
+  void _incrementCounter1() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter1 = (prefs.getInt('counter1') ?? 0) + 1;
+      prefs.setInt('counter1', _counter1);
+    });
+  }
+
+  Future<File> _incrementCounter2() {
+    setState(() {
+      _counter2++;
+    });
+
+    return widget.storage2.writeCounter(_counter2);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Fetch Post Example',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Fetch Post Example'),
-        ),
-        body: Center(
-          child: FutureBuilder<Post>(
-            future: futurePost,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return Container(
-                  padding: EdgeInsets.all(10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        snapshot.data!.title,
-                        style: TextStyle(color: Colors.red),
-                      ),
-                      Text(
-                        snapshot.data!.body,
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                    ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "$_counter1",
+                    style: textStyle,
                   ),
-                );
-              } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
-              }
-
-              return const CircularProgressIndicator();
-            },
+                  IconButton(
+                    onPressed: () {
+                      _incrementCounter1();
+                    },
+                    icon: Icon(
+                      Icons.add,
+                    ),
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  Text(
+                    "$_counter2",
+                    style: textStyle,
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      _incrementCounter2();
+                    },
+                    icon: Icon(
+                      Icons.add,
+                    ),
+                  )
+                ],
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
+  }
+}
+
+class CounterStorage {
+  Future<String> get _localPath async {
+    final directory = await getApplicationDocumentsDirectory();
+
+    return directory.path;
+  }
+
+  Future<File> get _localFile async {
+    final path = await _localPath;
+    return File("$path/counter.txt");
+  }
+
+  Future<int> readCounter() async {
+    try {
+      final file = await _localFile;
+      final counters = await file.readAsString();
+
+      return int.parse(counters);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  Future<File> writeCounter(int counter) async {
+    final file = await _localFile;
+
+    return file.writeAsString("$counter");
   }
 }
