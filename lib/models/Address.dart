@@ -21,4 +21,8 @@ class Address {
         zipcode: json["zipcode"],
         geo: Geo.fromJson(json["geo"]),
       );
+
+  getFullAddress() {
+    return "${this.street} ${this.suite} ${this.city} ${this.zipcode}";
+  }
 }

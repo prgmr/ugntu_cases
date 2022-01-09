@@ -44,6 +44,36 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             if (snapshot.hasData) {
               return ListView(
                 children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                    decoration: BoxDecoration(),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "${widget.user.name}",
+                              style: TextStyle(fontSize: 20),
+                            ),
+                            Text("${widget.user.username}"),
+                            Text("${widget.user.phone}"),
+                            Text("${widget.user.email}"),
+                            Text("${widget.user.address.getFullAddress()}"),
+                            Text(
+                              "${widget.user.company.name}",
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  Container(
+                    child: Text("TODOS:"),
+                  ),
                   for (var item in snapshot.data!)
                     Card(
                       elevation: 1,

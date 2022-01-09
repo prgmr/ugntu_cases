@@ -10,4 +10,8 @@ class Company {
         catchPhrase: json["catchPhrase"],
         bs: json["bs"],
       );
+
+  getFullCompany() {
+    return "${this.name} ${this.catchPhrase} ${bs}";
+  }
 }
