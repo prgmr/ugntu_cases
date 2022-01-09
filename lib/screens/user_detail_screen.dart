@@ -18,8 +18,9 @@ class UserDetailScreen extends StatefulWidget {
 
 class _UserDetailScreenState extends State<UserDetailScreen> {
   Future<List<Todo>> fetchTodos() async {
+    var iiid = widget.user.id.toString();
     var response = await http.get(Uri.parse(
-        'https://jsonplaceholder.typicode.com/users/' +
+        'https://jsonplaceholder.typicode.com/todos?userId=' +
             widget.user.id.toString()));
 
     if (response.statusCode == 200) {
@@ -49,7 +50,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                       child: ListTile(
                         onTap: () {},
                         title: Text(item.title),
-                        subtitle: Text("${item.completed}"),
+                        // subtitle: Text("${item.completed}"),
+                        trailing:
+                            Checkbox(value: item.completed, onChanged: null),
                       ),
                     ),
                 ],
